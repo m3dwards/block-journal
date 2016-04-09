@@ -1,4 +1,5 @@
-/* The token is used as a voting shares */
+/* The token contract represents the interface to the review token. This
+   is a standard interface for tokens in Ethereum */
 contract token { mapping (address => uint256) public balanceOf;  }
 
 
@@ -21,46 +22,51 @@ contract owned {
 }
 
 
-/* The democracy contract itself */
-contract Association is owned {
+contract Journal is owned {
 
     /* Contract Variables and events */
-    uint public minimumQuorum;
-    uint public debatingPeriodInMinutes;
-    Proposal[] public proposals;
-    uint public numProposals;
-    token public sharesTokenAddress;
+    uint public goalPost;
+    
+    Article[] public articles;
+    uint public numArticles;
 
-    event ProposalAdded(uint proposalID, address recipient, uint amount, string description);
-    event Voted(uint proposalID, bool position, address voter);
-    event ProposalTallied(uint proposalID, int result, uint quorum, bool active);
-    event ChangeOfRules(uint minimumQuorum, uint debatingPeriodInMinutes, address sharesTokenAddress);
+    Reviewer[] public reviewers;
+    uint public numReviewers;
 
-    struct Proposal {
-        address recipient;
-        uint amount;
-        string description;
-        uint votingDeadline;
-        bool executed;
-        bool proposalPassed;
-        uint numberOfVotes;
-        bytes32 proposalHash;
-        Vote[] votes;
-        mapping (address => bool) voted;
+    token public reviewTokenAddress;
+
+    event ArticleAdded(uint articleID, address author, string abstract);
+    event ArticleReviewed(uint articleID, address reviewer, bool judgement);
+    event ArticlePublished(uint articleID, address author, string abstract);
+
+    event ReviewerAdded(address author);
+
+    event ChangeOfRules(uint goalPost, address reviewTokenAddress);
+
+    struct Article {
+        address author;
+        string abstract;
+        string contents;
+        bool doubleBlind;
+        bool articlePublished;
+
+        uint numberOfReviews;
+        Review[] reviews;
+        mapping (address => bool) reviewed;
     }
 
-    struct Vote {
+    struct Review {
         bool inSupport;
-        address voter;
+        Reviewer reviewer;
     }
 
-    /* modifier that allows only shareholders to vote and create new proposals */
-    modifier onlyShareholders {
-        if (sharesTokenAddress.balanceOf(msg.sender) == 0) throw;
-        _
+    struct Reviewer {
+        address reviewer,
+        uint reputation 
     }
 
-    /* First time setup */
+
+    /* First time setup, similar in concept to a constructor */
     function Association(token sharesAddress, uint minimumSharesToPassAVote, uint minutesForDebate) {
         changeVotingRules(sharesAddress, minimumSharesToPassAVote, minutesForDebate);
     }
