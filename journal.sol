@@ -118,7 +118,7 @@ contract Journal is owned {
     function submitReview(uint articleId, bool inSupportOfPublishing) onlyReviewer {
          Article a = articles[articleId];
          if (a.reviewed[msg.sender]) throw;
-         a.numberOfReviews = a.numberOfReviews++;
+         a.numberOfReviews++;
          a.reviewed[msg.sender] = true;
 	 uint reviewId = a.reviews.length++;
 	 a.reviews[reviewId] = Review({inSupportOfPublishing: inSupportOfPublishing, reviewer: msg.sender});
