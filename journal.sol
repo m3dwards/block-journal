@@ -28,15 +28,16 @@ contract Journal is owned {
     uint public goalPost;
     
     Article[] public articles;
-    uint public numArticles;
+    uint public numberOfArticles;
 
+    mapping (address -> bool) authorisedReviewers
     Reviewer[] public reviewers;
-    uint public numReviewers;
+    uint public numberOfReviewers;
 
     token public reviewTokenAddress;
 
     event ArticleAdded(uint articleID, address author, string abstract);
-    event ArticleReviewed(uint articleID, address reviewer, bool judgement);
+    event ArticleReviewed(uint articleID, address reviewer, bool inSupportOfPublishing);
     event ArticlePublished(uint articleID, address author, string abstract);
 
     event ReviewerAdded(address author);
@@ -48,15 +49,16 @@ contract Journal is owned {
         string abstract;
         string contents;
         bool doubleBlind;
-        bool articlePublished;
+        bool published;
 
         uint numberOfReviews;
+
         Review[] reviews;
         mapping (address => bool) reviewed;
     }
 
     struct Review {
-        bool inSupport;
+        bool inSupportOfPublishing;
         Reviewer reviewer;
     }
 
@@ -67,110 +69,79 @@ contract Journal is owned {
 
 
     /* First time setup, similar in concept to a constructor */
-    function Association(token sharesAddress, uint minimumSharesToPassAVote, uint minutesForDebate) {
-        changeVotingRules(sharesAddress, minimumSharesToPassAVote, minutesForDebate);
+    function Article(token tokenAddress, uint goalPost) {
+        changeReviewRules(tokenAddress, goalPost);
     }
 
     /*change rules*/
-    function changeVotingRules(token sharesAddress, uint minimumSharesToPassAVote, uint minutesForDebate) onlyOwner {
-        sharesTokenAddress = token(sharesAddress);
-        if (minimumSharesToPassAVote == 0 ) minimumSharesToPassAVote = 1;
-        minimumQuorum = minimumSharesToPassAVote;
-        debatingPeriodInMinutes = minutesForDebate;
-        ChangeOfRules(minimumQuorum, debatingPeriodInMinutes, sharesTokenAddress);
+    function changeReviewRules(token tokenAddress, uint goalPost) onlyOwner {
+        reviewTokenAddress = token(tokenAddress);
+        if (goalPost == 0 ) goalPost = 1;
+        ChangeOfRules(goalPost, reviewTokenAddress);
     }
 
-    /* Function to create a new proposal */
-    function newProposal(
-        address beneficiary, 
-        uint etherAmount, 
-        string JobDescription, 
-        bytes transactionBytecode
-    ) 
-        onlyShareholders 
-        returns (uint proposalID) 
-    {
-        proposalID = proposals.length++;
-        Proposal p = proposals[proposalID];
-        p.recipient = beneficiary;
-        p.amount = etherAmount;
-        p.description = JobDescription;
-        p.proposalHash = sha3(beneficiary, etherAmount, transactionBytecode);
-        p.votingDeadline = now + debatingPeriodInMinutes * 1 minutes;
-        p.executed = false;
-        p.proposalPassed = false;
-        p.numberOfVotes = 0;
-        ProposalAdded(proposalID, beneficiary, etherAmount, JobDescription);
-        numProposals = proposalID+1;
+    function submitArticle (string abstract, string contents, bool doubleBlind) returns (uint articleId) {
+        articleId = articles.length++;
+        Article a = articles[articleId];
+        a.author = msg.sender;
+        a.abstract = abstract;
+        a.contents = contents;
+        a.doubleBlind = doubleBlind;
+        a.published = false;
+        a.numberOfReviews = 0;
+	a.qualityRank = 0;
+
+        numberOfArticles = articleId+1;
+
+        ArticleAdded(articleId, author, abstract);
     }
 
-    /* function to check if a proposal code matches */
-    function checkProposalCode(
-        uint proposalNumber, 
-        address beneficiary, 
-        uint etherAmount, 
-        bytes transactionBytecode
-    ) 
-        constant 
-        returns (bool codeChecksOut) 
-    {
-        Proposal p = proposals[proposalNumber];
-        return p.proposalHash == sha3(beneficiary, etherAmount, transactionBytecode);
+    function applyToBeAReviewer () returns (unit reviewerId) {
+        reviewerId = reviewers.length++;
+        Reviewer r = reviewers[reviewerId]
+	r.reviewer = msg.sender;
+        r.reputation = 1;
+
+        authorisedReviewers[msg.sender] = true;
+
+        ReviewerAdded(msg.sender);
     }
 
-    /* */
-    function vote(uint proposalNumber, bool supportsProposal) 
-        onlyShareholders 
-        returns (uint voteID)
-    {
-        Proposal p = proposals[proposalNumber];
-        if (p.voted[msg.sender] == true) throw;
-
-        voteID = p.votes.length++;
-        p.votes[voteID] = Vote({inSupport: supportsProposal, voter: msg.sender});
-        p.voted[msg.sender] = true;
-        p.numberOfVotes = voteID +1;
-        Voted(proposalNumber,  supportsProposal, msg.sender);
+    modifier onlyReviewer {
+        if (!authorisedReviewers[msg.sender]) throw;
+        _
     }
 
-    function executeProposal(uint proposalNumber, bytes transactionBytecode) returns (int result) {
-        Proposal p = proposals[proposalNumber];
-        /* Check if the proposal can be executed */
-        if (now < p.votingDeadline  /* has the voting deadline arrived? */ 
-            ||  p.executed        /* has it been already executed? */
-            ||  p.proposalHash != sha3(p.recipient, p.amount, transactionBytecode)) /* Does the transaction code match the proposal? */
-            throw;
+    function submitReview(uint articleId, bool inSupportOfPublishing) onlyReviewer {
+         Article a = articles[articleId];
+         if (a.reviewed[msg.sender]) throw;
+         a.numberOfReviews = a.numberOfReviews++;
+         a.reviewed[msg.sender] = true;
+	 reviewId = a.reviews.length++;
+	 a.reviews[reviewId] = Review({inSupportOfPublishing: inSupportOfPublishing, reviewer: msg.sender});
+         if (inSupportOfPublishing) {
+	     a.qualityRank = a.qualityRank++;
+         ArticleReviewed(articleId, msg.sender, inSupportOfPublishing);
 
-        /* tally the votes */
-        uint quorum = 0;
-        uint yea = 0; 
-        uint nay = 0;
+    }
 
-        for (uint i = 0; i <  p.votes.length; ++i) {
-            Vote v = p.votes[i];
-            uint voteWeight = sharesTokenAddress.balanceOf(v.voter); 
-            quorum += voteWeight;
-            if (v.inSupport) {
-                yea += voteWeight;
+    function attemptPublishOfArticle(uint articleId) returns (bool published) {
+        Article a = articles[articleId];
+        uint qualityRank = 0;
+        for (uint i = 0; i < a.reviews.length; ++i) {
+            Review r = a.reviews[i];
+            if (r.inSupportOfPublishing) {
+                qualityRank++;
             } else {
-                nay += voteWeight;
+                qualityRank--;
             }
         }
-
-        /* execute result */
-        if (quorum <= minimumQuorum) {
-            /* Not enough significant voters */
-            throw;
-        } else if (yea > nay ) {
-            /* has quorum and was approved */
-            p.recipient.call.value(p.amount * 1 ether)(transactionBytecode);
-            p.executed = true;
-            p.proposalPassed = true;
-        } else {
-            p.executed = true;
-            p.proposalPassed = false;
-        } 
-        // Fire Events
-        ProposalTallied(proposalNumber, result, quorum, p.proposalPassed);
+        if (qualityRank >= goalPost) {
+            a.published = true;
+            ArticlePublished(a.articleId, a.author, a.abstract);
+            return true;
+        }
+        return false;
     }
+
 }
