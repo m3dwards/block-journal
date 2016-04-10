@@ -1,32 +1,9 @@
-/* The token contract represents the interface to the review token. This
-   is a standard interface for tokens in Ethereum */
-contract token { mapping (address => uint256) public balanceOf;  }
-
-
-/* define 'owned' */
-contract owned {
-    address public owner;
-
-    function owned() {
-        owner = msg.sender;
-    }
-
-    modifier onlyOwner {
-        if (msg.sender != owner) throw;
-        _
-    }
-
-    function transferOwnership(address newOwner) onlyOwner {
-        owner = newOwner;
-    }
-}
-
 
 contract Journal is owned {
 
     /* Contract Variables and events */
     uint public _goalPost;
-    
+
     Article[] public articles;
     uint public numberOfArticles;
 
@@ -146,4 +123,27 @@ contract Journal is owned {
         return false;
     }
 
+}
+
+/* The token contract represents the interface to the review token. This
+   is a standard interface for tokens in Ethereum */
+contract token { mapping (address => uint256) public balanceOf;  }
+
+
+/* define 'owned' */
+contract owned {
+    address public owner;
+
+    function owned() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner {
+        if (msg.sender != owner) throw;
+        _
+    }
+
+    function transferOwnership(address newOwner) onlyOwner {
+        owner = newOwner;
+    }
 }
