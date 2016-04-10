@@ -25,7 +25,7 @@ contract owned {
 contract Journal is owned {
 
     /* Contract Variables and events */
-    uint public goalPost;
+    uint public _goalPost;
     
     Article[] public articles;
     uint public numberOfArticles;
@@ -76,7 +76,11 @@ contract Journal is owned {
     /*change rules*/
     function changeReviewRules(token tokenAddress, uint goalPost) onlyOwner {
         reviewTokenAddress = token(tokenAddress);
-        if (goalPost == 0 ) goalPost = 1;
+        if (goalPost == 0 ) {
+            _goalPost = 1;
+        } else {
+            _goalPost = goalPost;
+        }
         ChangeOfRules(goalPost, reviewTokenAddress);
     }
 
@@ -90,7 +94,7 @@ contract Journal is owned {
         a.published = false;
         a.numberOfReviews = 0;
 
-        numberOfArticles = articleId;
+        numberOfArticles = articleId+1;
 
         ArticleAdded(articleId, a.author, abstract);
     }
@@ -102,7 +106,7 @@ contract Journal is owned {
         r.reputation = 1;
 
         authorisedReviewers[msg.sender] = true;
-
+        numberOfReviewers = reviewerId+1;
         ReviewerAdded(msg.sender);
     }
 
@@ -134,7 +138,7 @@ contract Journal is owned {
                 qualityRank--;
             }
         }
-        if (qualityRank >= goalPost) {
+        if (qualityRank >= _goalPost) {
             a.published = true;
             ArticlePublished(articleId, a.author, a.abstract);
             return true;
