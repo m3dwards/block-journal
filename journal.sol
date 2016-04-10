@@ -30,15 +30,15 @@ contract Journal is owned {
     Article[] public articles;
     uint public numberOfArticles;
 
-    mapping (address -> bool) authorisedReviewers
+    mapping (address => bool) authorisedReviewers;
     Reviewer[] public reviewers;
     uint public numberOfReviewers;
 
     token public reviewTokenAddress;
 
-    event ArticleAdded(uint articleID, address author, string abstract);
-    event ArticleReviewed(uint articleID, address reviewer, bool inSupportOfPublishing);
-    event ArticlePublished(uint articleID, address author, string abstract);
+    event ArticleAdded(uint articleId, address author, string abstract);
+    event ArticleReviewed(uint articleId, address reviewer, bool inSupportOfPublishing);
+    event ArticlePublished(uint articleId, address author, string abstract);
 
     event ReviewerAdded(address author);
 
@@ -59,17 +59,17 @@ contract Journal is owned {
 
     struct Review {
         bool inSupportOfPublishing;
-        Reviewer reviewer;
+        address reviewer;
     }
 
     struct Reviewer {
-        address reviewer,
-        uint reputation 
+        address reviewer;
+        uint reputation;
     }
 
 
     /* First time setup, similar in concept to a constructor */
-    function Article(token tokenAddress, uint goalPost) {
+    function Journal(token tokenAddress, uint goalPost) {
         changeReviewRules(tokenAddress, goalPost);
     }
 
@@ -89,16 +89,15 @@ contract Journal is owned {
         a.doubleBlind = doubleBlind;
         a.published = false;
         a.numberOfReviews = 0;
-	a.qualityRank = 0;
 
-        numberOfArticles = articleId+1;
+        numberOfArticles = articleId;
 
-        ArticleAdded(articleId, author, abstract);
+        ArticleAdded(articleId, a.author, abstract);
     }
 
-    function applyToBeAReviewer () returns (unit reviewerId) {
+    function applyToBeAReviewer () returns (uint reviewerId) {
         reviewerId = reviewers.length++;
-        Reviewer r = reviewers[reviewerId]
+        Reviewer r = reviewers[reviewerId];
 	r.reviewer = msg.sender;
         r.reputation = 1;
 
@@ -117,10 +116,9 @@ contract Journal is owned {
          if (a.reviewed[msg.sender]) throw;
          a.numberOfReviews = a.numberOfReviews++;
          a.reviewed[msg.sender] = true;
-	 reviewId = a.reviews.length++;
+	 uint reviewId = a.reviews.length++;
 	 a.reviews[reviewId] = Review({inSupportOfPublishing: inSupportOfPublishing, reviewer: msg.sender});
-         if (inSupportOfPublishing) {
-	     a.qualityRank = a.qualityRank++;
+
          ArticleReviewed(articleId, msg.sender, inSupportOfPublishing);
 
     }
@@ -138,7 +136,7 @@ contract Journal is owned {
         }
         if (qualityRank >= goalPost) {
             a.published = true;
-            ArticlePublished(a.articleId, a.author, a.abstract);
+            ArticlePublished(articleId, a.author, a.abstract);
             return true;
         }
         return false;
