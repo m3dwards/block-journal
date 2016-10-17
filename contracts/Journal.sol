@@ -1,6 +1,6 @@
+import "Owned.sol";
 
-contract Journal is owned {
-
+contract Journal is Owned {
     /* Contract Variables and events */
     uint public _goalPost;
 
@@ -130,20 +130,3 @@ contract Journal is owned {
 contract token { mapping (address => uint256) public balanceOf;  }
 
 
-/* define 'owned' */
-contract owned {
-    address public owner;
-
-    function owned() {
-        owner = msg.sender;
-    }
-
-    modifier onlyOwner {
-        if (msg.sender != owner) throw;
-        _
-    }
-
-    function transferOwnership(address newOwner) onlyOwner {
-        owner = newOwner;
-    }
-}
