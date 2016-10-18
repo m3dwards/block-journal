@@ -47,7 +47,8 @@ contract Journal is Owned {
 
     /* First time setup, similar in concept to a constructor */
     function Journal(token tokenAddress, uint goalPost) {
-        changeReviewRules(tokenAddress, goalPost);
+        numberOfArticles = 6;
+        //changeReviewRules(tokenAddress, goalPost);
     }
 
     /*change rules*/
@@ -59,6 +60,19 @@ contract Journal is Owned {
             _goalPost = goalPost;
         }
         ChangeOfRules(goalPost, reviewTokenAddress);
+    }
+
+    function simpleSubmit(uint randomNumber) returns (uint articleId) {
+        //articleId = articles.length++;
+       // Article a = articles[articleId];
+        //a.author = msg.sender;
+        //a.abstract = "abstract";
+        //a.contents = "contents";
+        //a.doubleBlind = false;
+        //a.published = false;
+        //a.numberOfReviews = 0;
+        numberOfArticles = 4;
+        articleId = 3;
     }
 
     function submitArticle (string abstract, string contents, bool doubleBlind) returns (uint articleId) {

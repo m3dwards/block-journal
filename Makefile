@@ -12,7 +12,7 @@ ip_address = $(shell ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*
 .PHONEY: dev
 dev:
 	$(call green,"[Running dev container over current directory]")
-	docker run --rm -it -i -p 8080:8080 -v $(mount_location):/opt/src -w /opt/src --name truffledev $(image_name) /bin/bash
+	docker run --rm -it -i -p 8080:8080 -p 8646:8646 -v $(mount_location):/opt/src -w /opt/src --name truffledev $(image_name) /bin/bash
 
 .PHONEY: connect-dev
 dev-connect:
@@ -33,4 +33,4 @@ geth:
 
 .PHONEY: geth-morden
 geth-morden:
-	geth --password .gethpwd --testnet --rpc --rpcaddr "$(ip_address)" --unlock 0
+	geth --fast --cache=1024 --password .gethpwd --testnet --rpc --rpcaddr "$(ip_address)" --unlock 0

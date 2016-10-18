@@ -10,8 +10,8 @@ module.exports = {
     "images/": "images/"
   },
   rpc: {
-    host: "192.168.1.5",
-    port: 8545
+    host: "localhost",
+    port: 8646
   },
   networks: {
     "live": {
@@ -21,8 +21,8 @@ module.exports = {
     },
     "morden": {
         network_id: 2,
-        host: "localhost",
-        port: 8646
+        host: "192.168.1.5",
+        port: 8545
     },
     "staging": {
         network_id: 1337 // custom private network
