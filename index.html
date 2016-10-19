@@ -1,0 +1,39 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Journal</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link href="./app.css" rel='stylesheet' type='text/css'>
+  <script src="//api.backendless.com/sdk/js/latest/backendless.js"></script>
+  <script src="./app.js"></script>
+</head>
+<body>
+  <h1>Journal</h1>
+  <h2>Published Articles</h2>
+  <br>
+  Number of articles published: <span id="numberofarticles"></span>
+  <br>
+  <br>
+  <div id="publish-article">
+    <h1>Publish Article</h1>
+    <br>
+    <!-- <form> -->
+      <label for="ShortDescription">Short Description:</label>
+      <input type="text" id="ShortDescription" />
+      <br><br>
+      <label for="FullText">Full Text:</label>
+      <input type="textarea" id="FullText" />
+      <br><br>
+      <label for="files">Select PDF file</label>
+      <input type="file" id="file" name="file" />
+      <br><br>
+      <button id="SubmitArticleButton" onclick="submitArticle()">Submit Article</button>
+    <!-- </form> -->
+  </div>
+  <br>
+  <br>
+  <span id="status"></span>
+</body>
+</html>
