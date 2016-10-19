@@ -44,6 +44,8 @@ function getNumberOfArticles() {
     var journal = Journal.deployed();
     journal.numberOfArticles.call().then(function(value){
         showNumberOfArticles(value);
+    }).catch(function(e) {
+        cosole.log(e);
     });
 }
 
