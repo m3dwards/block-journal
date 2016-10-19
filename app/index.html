@@ -4,6 +4,7 @@
   <title>Journal</title>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
   <link href="./app.css" rel='stylesheet' type='text/css'>
+  <script src="//api.backendless.com/sdk/js/latest/backendless.js"></script>
   <script src="./app.js"></script>
 </head>
 <body>
@@ -22,6 +23,9 @@
       <br><br>
       <label for="FullText">Full Text:</label>
       <input type="textarea" id="FullText" />
+      <br><br>
+      <label for="files">Select PDF file</label>
+      <input type="file" id="file" name="file" />
       <br><br>
       <button id="SubmitArticleButton" onclick="submitArticle()">Submit Article</button>
     <!-- </form> -->
