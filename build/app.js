@@ -47156,7 +47156,7 @@ window.addEventListener('load', function() {
 
                                                                 
 
-  [Owned,Migrations,Journal,ReviewToken,token,tokenrecipient].forEach(function(contract) {         
+  [Journal,Migrations,Owned,ReviewToken,token,tokenrecipient].forEach(function(contract) {         
 
     contract.setProvider(window.web3.currentProvider);          
 
@@ -47243,6 +47243,13 @@ function submitArticle() {
     });
 };
 
+function getNumberOfArticles() {
+    var journal = Journal.deployed();
+    journal.numberOfArticles().then(function(value){
+        showNumberOfArticles(value);
+    });
+}
+
 function showNumberOfArticles(value) {
     document.getElementById("numberofarticles").innerHTML = value;
 };
@@ -47264,7 +47271,7 @@ window.onload = function() {
 
         refreshBalance();
 
-        showNumberOfArticles()
+        getNumberOfArticles()
     });
 
     backendInit();

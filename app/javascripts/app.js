@@ -40,6 +40,13 @@ function submitArticle() {
     });
 };
 
+function getNumberOfArticles() {
+    var journal = Journal.deployed();
+    journal.numberOfArticles().then(function(value){
+        showNumberOfArticles(value);
+    });
+}
+
 function showNumberOfArticles(value) {
     document.getElementById("numberofarticles").innerHTML = value;
 };
@@ -61,7 +68,7 @@ window.onload = function() {
 
         refreshBalance();
 
-        showNumberOfArticles()
+        getNumberOfArticles()
     });
 
     backendInit();
