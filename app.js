@@ -47156,7 +47156,7 @@ window.addEventListener('load', function() {
 
                                                                 
 
-  [Migrations,Journal,Owned,ReviewToken,token,tokenrecipient].forEach(function(contract) {         
+  [Journal,ReviewToken,Owned,Migrations,tokenrecipient,token].forEach(function(contract) {         
 
     contract.setProvider(window.web3.currentProvider);          
 
@@ -47247,6 +47247,8 @@ function getNumberOfArticles() {
     var journal = Journal.deployed();
     journal.numberOfArticles.call().then(function(value){
         showNumberOfArticles(value);
+    }).catch(function(e) {
+        cosole.log(e);
     });
 }
 
