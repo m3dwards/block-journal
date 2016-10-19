@@ -28,7 +28,7 @@ function submitArticle() {
 
     journal.submitArticle(description, fullText, false, {from: account}).then(function() {
         setStatus("Article Submitted");
-        return journal.numberOfArticles();
+        return journal.numberOfArticles.call();
     }).catch(function(e) {
         console.log(e);
         setStatus("Problem submitting Article");
@@ -42,7 +42,7 @@ function submitArticle() {
 
 function getNumberOfArticles() {
     var journal = Journal.deployed();
-    journal.numberOfArticles().then(function(value){
+    journal.numberOfArticles.call().then(function(value){
         showNumberOfArticles(value);
     });
 }
