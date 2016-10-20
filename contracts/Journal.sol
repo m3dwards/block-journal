@@ -19,7 +19,7 @@ contract Journal is Owned {
 
     event ReviewerAdded(address author);
 
-    event ChangeOfRules(uint goalPost, address reviewTokenAddress);
+    event ChangeOfRules(uint goalPost);
 
     struct Article {
         address author;
@@ -46,20 +46,21 @@ contract Journal is Owned {
 
 
     /* First time setup, similar in concept to a constructor */
-    function Journal(token tokenAddress, uint goalPost) {
+    function Journal(uint goalPost) {
         numberOfArticles = 6;
-        //changeReviewRules(tokenAddress, goalPost);
+        numberOfReviewers = 7;
+        changeReviewRules(goalPost);
     }
 
     /*change rules*/
-    function changeReviewRules(token tokenAddress, uint goalPost) onlyOwner {
-        reviewTokenAddress = token(tokenAddress);
+    function changeReviewRules(uint goalPost) onlyOwner {
+        //reviewTokenAddress = token(tokenAddress);
         if (goalPost == 0 ) {
             _goalPost = 1;
         } else {
             _goalPost = goalPost;
         }
-        ChangeOfRules(goalPost, reviewTokenAddress);
+        ChangeOfRules(goalPost);
     }
 
     function simpleSubmit(uint randomNumber) returns (uint articleId) {
